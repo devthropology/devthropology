@@ -10,7 +10,7 @@ import {
 import { Backfiller } from "./backfill/backfiller.ts";
 import { GhApi } from "./api/ghApi.ts";
 import { PostgresRepository } from "./repository/postgresRepository.ts";
-import { createSqlClient } from "./repository/sqlClient.ts";
+import { createSqlClient, resolveDatabaseUrl } from "./repository/sqlClient.ts";
 import { PostgresComputedUserMetricsRepository } from "./repository/postgresComputedUserMetricsRepository.ts";
 import { PostgresUserRelationshipRepository } from "./repository/postgresUserRelationshipRepository.ts";
 import { PostgresAuthRepository } from "./repository/postgresAuthRepository.ts";
@@ -101,7 +101,7 @@ function getBackfillContext(
 }
 
 function getAuthContext(): AuthContext {
-  const connectionString = env.DATABASE_URL_PG;
+  const connectionString = resolveDatabaseUrl();
 
   if (!connectionString) {
     console.error("DATABASE_URL_PG must be provided via environment variable");
