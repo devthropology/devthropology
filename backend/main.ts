@@ -13,6 +13,7 @@ import {
   createReportSqlClient,
   createSqlClient,
   getSharedSqlClient,
+  resolveDatabaseUrl,
   SqlClient,
 } from "./repository/sqlClient.ts";
 import { ComputedUserMetricsRepository } from "./repository/computedUserMetricsRepository.ts";
@@ -514,10 +515,10 @@ registerFatalErrorHandlers();
 async function initializeFromEnv() {
   const start = Date.now();
 
-  const pgUrl = env.DATABASE_URL_PG;
+  const pgUrl = resolveDatabaseUrl();
   if (!pgUrl) {
     throw new Error(
-      "DATABASE_URL_PG must be configured for authentication services",
+      "DATABASE_URL_PG (or the Vercel Aurora PG_PGHOST integration) must be configured",
     );
   }
 

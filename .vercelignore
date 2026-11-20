@@ -1,0 +1,4 @@
+# Local env files (e.g. the orb's generated .env) must never ship to Vercel.
+.env
+.env.*
+!.env.example
