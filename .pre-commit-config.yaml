@@ -1,0 +1,45 @@
+fail_fast: true
+repos:
+  - repo: local
+    hooks:
+      - id: fmt
+        name: fmt
+        entry: pnpm run format:check
+        language: system
+        pass_filenames: false
+        files: (\.(ts|tsx|js|jsx|mjs|cjs)$|^\.oxfmtrc\.json$)
+        exclude: ^frontend/.*
+      - id: fmt-frontend
+        name: fmt-frontend
+        entry: bash -c 'files=(); for file in "$@"; do files+=("${file#frontend/}"); done; cd frontend && pnpm exec oxfmt --check "${files[@]}"' --
+        language: system
+        files: ^frontend/.*\.(ts|tsx|js|jsx)$
+        pass_filenames: true
+      - id: lint-frontend
+        name: lint-frontend
+        entry: bash -c 'files=(); for file in "$@"; do files+=("${file#frontend/}"); done; cd frontend && pnpm exec oxlint "${files[@]}"' --
+        language: system
+        files: ^frontend/.*\.(ts|tsx|js|jsx)$
+        pass_filenames: true
+      - id: lint-frontend-type-aware
+        name: lint-frontend-type-aware
+        # Parallel filename batches race while replacing .react-router/types.
+        require_serial: true
+        entry: bash -c 'files=(); for file in "$@"; do files+=("${file#frontend/}"); done; cd frontend && pnpm exec react-router typegen && pnpm exec oxlint --type-aware --type-check "${files[@]}"' --
+        language: system
+        files: ^frontend/.*\.(ts|tsx|js|jsx)$
+        pass_filenames: true
+      - id: check
+        name: check
+        entry: bash -c 'pnpm run check:node && pnpm run check:tests'
+        language: system
+        pass_filenames: false
+        files: \.(ts)$
+        exclude: ^frontend/.*
+      - id: lint
+        name: lint
+        entry: pnpm run lint
+        language: system
+        pass_filenames: false
+        files: (\.(ts|tsx|js|jsx|mjs|cjs)$|^\.oxlintrc\.json$|^package(-lock)?\.json$)
+        exclude: ^frontend/.*

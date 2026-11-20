@@ -1,0 +1,22 @@
+FROM node:26-bookworm-slim
+WORKDIR /app
+
+ENV NODE_ENV=production
+RUN npm install --global pnpm@12.10.1
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY backend/package.json ./backend/package.json
+COPY frontend/package.json ./frontend/package.json
+RUN pnpm --filter devthropology --filter @devthropology/backend install --prod --frozen-lockfile
+COPY --chown=node:node . .
+RUN mkdir -p /data/github-archive && chown node:node /app /data/github-archive
+# Mount persistent storage here; inject R2 credentials at runtime.
+ENV GH_ARCHIVE_DIR=/data/github-archive
+
+ENV PORT=8080
+EXPOSE 8080
+USER node
+
+# Railway cron services can override this with a direct Node command.
+ENV START_COMMAND="node --import tsx backend/main.ts"
+ENTRYPOINT ["/bin/sh", "-c"]
+CMD ["exec $START_COMMAND"]

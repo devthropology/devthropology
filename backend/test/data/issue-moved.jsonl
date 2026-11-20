@@ -1,0 +1,1 @@
+{"1":[{"endpoint":"https://api.github.com/repos/org/repo/issues/1","response":{"message":"Moved Permanently","url":"","documentation_url":"https://docs.github.com/rest/guides/best-practices-for-using-the-rest-api#follow-redirects"},"status":301}]}

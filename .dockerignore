@@ -1,0 +1,21 @@
+.git
+**/node_modules
+**/.env
+**/.env.*
+!**/.env.example
+_devthropology_postgres*
+*.db
+*.dump
+*.log
+request_log.txt
+tailscale.jsonl
+# Never bake private GitHub captures into an image.
+data
+backend/data
+**/*.json.zst
+**/*.json.zst*.partial
+coverage
+frontend/build
+frontend/build-self-hosted
+frontend/.react-router
+devthropology

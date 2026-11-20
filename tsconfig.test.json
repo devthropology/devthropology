@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "backend/**/*.ts",
+    "shared/**/*.ts",
+    "vitest.config.ts"
+  ],
+  "exclude": ["frontend", "node_modules"]
+}

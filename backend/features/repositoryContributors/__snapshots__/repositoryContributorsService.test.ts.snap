@@ -1,0 +1,354 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`RepositoryContributorsService > returns monthly contributor snapshot 1`] = `
+{
+  "months": [
+    {
+      "active": {
+        "contributors": [
+          {
+            "date": "2020-02-29T23:27:10+00:00",
+            "login": "crawshaw",
+            "userId": 37,
+          },
+          {
+            "date": "2020-02-29T21:01:18+00:00",
+            "login": "bradfitz",
+            "userId": 1,
+          },
+          {
+            "date": "2020-02-28T08:12:59+00:00",
+            "login": "danderson",
+            "userId": 18,
+          },
+          {
+            "date": "2020-02-27T22:32:21+00:00",
+            "login": "mewil",
+            "userId": 104,
+          },
+          {
+            "date": "2020-02-22T14:07:22+00:00",
+            "login": "ekrem95",
+            "userId": 106,
+          },
+          {
+            "date": "2020-02-21T23:28:47+00:00",
+            "login": "wardn",
+            "userId": 71,
+          },
+          {
+            "date": "2020-02-21T20:26:06+00:00",
+            "login": "fgergo",
+            "userId": 24,
+          },
+          {
+            "date": "2020-02-20T09:49:53+00:00",
+            "login": "martinbaillie",
+            "userId": 99,
+          },
+          {
+            "date": "2020-02-17T22:13:06+00:00",
+            "login": "tklauser",
+            "userId": 108,
+          },
+          {
+            "date": "2020-02-16T04:04:12+00:00",
+            "login": "apenwarr",
+            "userId": 10,
+          },
+          {
+            "date": "2020-02-13T07:10:28+00:00",
+            "login": "evalexpr",
+            "userId": 116,
+          },
+          {
+            "date": "2020-02-11T11:39:32+00:00",
+            "login": "reistiago",
+            "userId": 120,
+          },
+          {
+            "date": "2020-02-11T09:04:54+00:00",
+            "login": "shawnps",
+            "userId": 121,
+          },
+          {
+            "date": "2020-02-11T01:52:44+00:00",
+            "login": "jzelinskie",
+            "userId": 76,
+          },
+        ],
+        "count": 14,
+      },
+      "churned": {
+        "contributors": [
+          {
+            "date": "2020-02-27T22:32:21+00:00",
+            "login": "mewil",
+            "userId": 104,
+          },
+          {
+            "date": "2020-02-22T14:07:22+00:00",
+            "login": "ekrem95",
+            "userId": 106,
+          },
+          {
+            "date": "2020-02-17T22:13:06+00:00",
+            "login": "tklauser",
+            "userId": 108,
+          },
+          {
+            "date": "2020-02-13T07:10:28+00:00",
+            "login": "evalexpr",
+            "userId": 116,
+          },
+          {
+            "date": "2020-02-11T11:39:32+00:00",
+            "login": "reistiago",
+            "userId": 120,
+          },
+          {
+            "date": "2020-02-11T09:04:54+00:00",
+            "login": "shawnps",
+            "userId": 121,
+          },
+          {
+            "date": "2020-02-11T01:52:44+00:00",
+            "login": "jzelinskie",
+            "userId": 76,
+          },
+        ],
+        "count": 7,
+      },
+      "month": 2,
+      "new": {
+        "contributors": [
+          {
+            "date": "2020-02-27T22:32:21+00:00",
+            "login": "mewil",
+            "userId": 104,
+          },
+          {
+            "date": "2020-02-22T14:07:22+00:00",
+            "login": "ekrem95",
+            "userId": 106,
+          },
+          {
+            "date": "2020-02-21T20:26:06+00:00",
+            "login": "fgergo",
+            "userId": 24,
+          },
+          {
+            "date": "2020-02-17T22:13:06+00:00",
+            "login": "tklauser",
+            "userId": 108,
+          },
+          {
+            "date": "2020-02-12T20:13:30+00:00",
+            "login": "evalexpr",
+            "userId": 116,
+          },
+          {
+            "date": "2020-02-12T07:28:17+00:00",
+            "login": "martinbaillie",
+            "userId": 99,
+          },
+          {
+            "date": "2020-02-11T20:21:47+00:00",
+            "login": "apenwarr",
+            "userId": 10,
+          },
+          {
+            "date": "2020-02-11T11:39:32+00:00",
+            "login": "reistiago",
+            "userId": 120,
+          },
+          {
+            "date": "2020-02-11T09:04:54+00:00",
+            "login": "shawnps",
+            "userId": 121,
+          },
+          {
+            "date": "2020-02-11T05:26:57+00:00",
+            "login": "bradfitz",
+            "userId": 1,
+          },
+          {
+            "date": "2020-02-11T04:49:14+00:00",
+            "login": "danderson",
+            "userId": 18,
+          },
+          {
+            "date": "2020-02-11T03:08:52+00:00",
+            "login": "crawshaw",
+            "userId": 37,
+          },
+          {
+            "date": "2020-02-11T01:52:44+00:00",
+            "login": "jzelinskie",
+            "userId": 76,
+          },
+          {
+            "date": "2020-02-10T22:51:02+00:00",
+            "login": "wardn",
+            "userId": 71,
+          },
+        ],
+        "count": 14,
+      },
+      "year": 2020,
+    },
+    {
+      "active": {
+        "contributors": [
+          {
+            "date": "2020-03-30T05:15:09+00:00",
+            "login": "bradfitz",
+            "userId": 1,
+          },
+          {
+            "date": "2020-03-30T05:11:16+00:00",
+            "login": "crawshaw",
+            "userId": 37,
+          },
+          {
+            "date": "2020-03-27T23:59:01+00:00",
+            "login": "danderson",
+            "userId": 18,
+          },
+          {
+            "date": "2020-03-08T05:14:27+00:00",
+            "login": "martinbaillie",
+            "userId": 99,
+          },
+          {
+            "date": "2020-03-02T21:41:15+00:00",
+            "login": "fgergo",
+            "userId": 24,
+          },
+        ],
+        "count": 5,
+      },
+      "churned": {
+        "contributors": [
+          {
+            "date": "2020-03-08T05:14:27+00:00",
+            "login": "martinbaillie",
+            "userId": 99,
+          },
+          {
+            "date": "2020-03-02T21:41:15+00:00",
+            "login": "fgergo",
+            "userId": 24,
+          },
+        ],
+        "count": 2,
+      },
+      "month": 3,
+      "new": {
+        "contributors": [],
+        "count": 0,
+      },
+      "year": 2020,
+    },
+    {
+      "active": {
+        "contributors": [
+          {
+            "date": "2020-04-30T20:22:58+00:00",
+            "login": "danderson",
+            "userId": 18,
+          },
+          {
+            "date": "2020-04-29T03:37:38+00:00",
+            "login": "bradfitz",
+            "userId": 1,
+          },
+          {
+            "date": "2020-04-27T20:50:22+00:00",
+            "login": "apenwarr",
+            "userId": 10,
+          },
+          {
+            "date": "2020-04-27T18:52:54+00:00",
+            "login": "eliasnaur",
+            "userId": 3,
+          },
+          {
+            "date": "2020-04-18T21:10:38+00:00",
+            "login": "wardn",
+            "userId": 71,
+          },
+          {
+            "date": "2020-04-10T23:23:01+00:00",
+            "login": "crawshaw",
+            "userId": 37,
+          },
+          {
+            "date": "2020-04-10T16:53:23+00:00",
+            "login": "bgentry",
+            "userId": 85,
+          },
+          {
+            "date": "2020-04-10T11:25:56+00:00",
+            "login": "sylr",
+            "userId": 34,
+          },
+          {
+            "date": "2020-04-08T20:03:55+00:00",
+            "login": "stablebits",
+            "userId": 87,
+          },
+        ],
+        "count": 9,
+      },
+      "churned": {
+        "contributors": [
+          {
+            "date": "2020-04-18T21:10:38+00:00",
+            "login": "wardn",
+            "userId": 71,
+          },
+          {
+            "date": "2020-04-10T16:53:23+00:00",
+            "login": "bgentry",
+            "userId": 85,
+          },
+          {
+            "date": "2020-04-08T20:03:55+00:00",
+            "login": "stablebits",
+            "userId": 87,
+          },
+        ],
+        "count": 3,
+      },
+      "month": 4,
+      "new": {
+        "contributors": [
+          {
+            "date": "2020-04-24T13:25:30+00:00",
+            "login": "eliasnaur",
+            "userId": 3,
+          },
+          {
+            "date": "2020-04-08T06:48:59+00:00",
+            "login": "sylr",
+            "userId": 34,
+          },
+          {
+            "date": "2020-04-06T21:55:15+00:00",
+            "login": "bgentry",
+            "userId": 85,
+          },
+          {
+            "date": "2020-04-06T07:24:58+00:00",
+            "login": "stablebits",
+            "userId": 87,
+          },
+        ],
+        "count": 4,
+      },
+      "year": 2020,
+    },
+  ],
+}
+`;

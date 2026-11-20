@@ -1,0 +1,11 @@
+# Dockerfile.pgloader
+FROM debian:bookworm-slim
+
+# Install pgloader and its dependencies from Debian repos.
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      pgloader \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /data
+ENTRYPOINT ["pgloader"]

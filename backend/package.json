@@ -1,0 +1,40 @@
+{
+  "name": "@devthropology/backend",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "devthropology": "./cli/devthropology.mjs"
+  },
+  "scripts": {
+    "start": "node --import tsx main.ts",
+    "dev": "node --import tsx --watch main.ts",
+    "cli": "node --import tsx cli.ts",
+    "devthropology": "node cli/devthropology.mjs",
+    "cron:backfill": "node --import tsx cron/backfill.ts",
+    "cron:sync": "node --import tsx cli.ts sync-cron",
+    "test": "cd .. && pnpm exec vitest run",
+    "test:watch": "cd .. && pnpm exec vitest"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "3.1152.0",
+    "@hono/node-server": "2.1.4",
+    "@sentry/core": "10.38.0",
+    "@sentry/node": "10.38.0",
+    "commander": "14.0.3",
+    "date-fns": "4.1.0",
+    "hono": "4.10.3",
+    "postgres": "3.4.7",
+    "pretty-ms": "9.3.0",
+    "sqids": "0.3.0",
+    "tsx": "4.23.15",
+    "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "@testcontainers/postgresql": "11.7.2",
+    "@types/proper-lockfile": "4.1.4",
+    "proper-lockfile": "4.1.2"
+  },
+  "engines": {
+    "node": ">=26.0.0"
+  }
+}

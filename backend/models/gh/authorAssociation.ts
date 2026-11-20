@@ -1,0 +1,7 @@
+export enum AuthorAssociation {
+  COLLABORATOR = "COLLABORATOR",
+  CONTRIBUTOR = "CONTRIBUTOR",
+  MEMBER = "MEMBER",
+  OWNER = "OWNER",
+  NONE = "NONE",
+}

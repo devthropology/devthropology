@@ -1,0 +1,53 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Backend E2E Tests > Workspace API Endpoints > GET /api/repository/:repositoryId/teams returns snapshot 1`] = `
+[
+  {
+    "createdAt": "<createdAt>",
+    "ghOrgLogin": null,
+    "ghTeamId": null,
+    "memberCount": 3,
+    "name": "Snapshot Team",
+    "repositoryId": 1,
+    "slug": "snapshot-team",
+    "sourceType": "manual",
+    "teamId": "<teamId>",
+    "updatedAt": "<updatedAt>",
+  },
+]
+`;
+
+exports[`Backend E2E Tests > Workspace API Endpoints > GET /api/repository/:repositoryId/teams/:teamId/members returns snapshot 1`] = `
+[
+  {
+    "createdAt": "<createdAt>",
+    "ghLogin": "bradfitz",
+    "memberRole": null,
+    "sourceType": "manual",
+    "teamId": "<teamId>",
+    "teamMemberId": "<teamMemberId>",
+    "updatedAt": "<updatedAt>",
+    "userId": 1,
+  },
+  {
+    "createdAt": "<createdAt>",
+    "ghLogin": "crawshaw",
+    "memberRole": null,
+    "sourceType": "manual",
+    "teamId": "<teamId>",
+    "teamMemberId": "<teamMemberId>",
+    "updatedAt": "<updatedAt>",
+    "userId": 37,
+  },
+  {
+    "createdAt": "<createdAt>",
+    "ghLogin": "danderson",
+    "memberRole": null,
+    "sourceType": "manual",
+    "teamId": "<teamId>",
+    "teamMemberId": "<teamMemberId>",
+    "updatedAt": "<updatedAt>",
+    "userId": 18,
+  },
+]
+`;

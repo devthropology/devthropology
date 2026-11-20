@@ -1,0 +1,53 @@
+{
+  "name": "devthropology",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "pnpm --filter @devthropology/backend start",
+    "start:api": "pnpm --filter @devthropology/backend start",
+    "dev": "pnpm --filter @devthropology/backend dev",
+    "startFe": "pnpm --filter @devthropology/frontend dev",
+    "build:prod": "pnpm --filter @devthropology/frontend build:self-hosted",
+    "start:prod": "pnpm --filter @devthropology/frontend start:self-hosted",
+    "cli": "node --import tsx backend/cli.ts",
+    "devthropology": "node backend/cli/devthropology.mjs",
+    "cron:backfill": "pnpm --filter @devthropology/backend cron:backfill",
+    "cron:sync": "pnpm --filter @devthropology/backend cron:sync",
+    "db:new": "DBMATE_MIGRATIONS_DIR=backend/schema_migrations/postgres dbmate --env DATABASE_URL_PG_DBMATE new",
+    "db:migrate": "DBMATE_MIGRATIONS_DIR=backend/schema_migrations/postgres DBMATE_NO_DUMP_SCHEMA=1 dbmate --env DATABASE_URL_PG_DBMATE up",
+    "db:rollback": "DBMATE_MIGRATIONS_DIR=backend/schema_migrations/postgres dbmate --env DATABASE_URL_PG_DBMATE down",
+    "db:status": "DBMATE_MIGRATIONS_DIR=backend/schema_migrations/postgres dbmate --env DATABASE_URL_PG_DBMATE status",
+    "db:dump": "docker exec $(docker ps -q --filter \"name=devthropology-postgres\") pg_dump -h localhost -U postgres -d devthropology --schema-only > backend/schema_migrations/postgres/schema.sql",
+    "db:bootstrap": "docker exec $(docker ps -q --filter \"name=postgres\") psql -h localhost -U postgres -d devthropology -c \"INSERT INTO schema_migrations (version) VALUES ('20250704154205') ON CONFLICT (version) DO NOTHING;\"",
+    "format": "git ls-files -z -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs' ':!:frontend/**' | xargs -0 oxfmt --write",
+    "format:check": "git ls-files -z -- '*.ts' '*.tsx' '*.js' '*.jsx' '*.mjs' '*.cjs' ':!:frontend/**' | xargs -0 oxfmt --check",
+    "lint": "oxlint --disable-nested-config --deny-warnings .",
+    "lint:fix": "pnpm run lint --fix",
+    "check": "pnpm run check:node && pnpm run check:tests",
+    "check:node": "tsc --noEmit",
+    "smoke:node": "node --import tsx tools/nodeCompatibilitySmoke.ts",
+    "test": "pnpm run test:backend && pnpm run test:frontend",
+    "test:watch": "pnpm --filter @devthropology/backend test:watch",
+    "check:tests": "tsc --noEmit -p tsconfig.test.json",
+    "test:backend": "pnpm --filter @devthropology/backend test",
+    "test:frontend": "pnpm --filter @devthropology/frontend test",
+    "check:frontend": "pnpm --filter @devthropology/frontend typecheck"
+  },
+  "dependencies": {
+    "dbmate": "2.28.0",
+    "tsx": "4.23.15",
+    "zod": "4.1.12"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.4",
+    "oxfmt": "0.73.0",
+    "oxlint": "1.55.0",
+    "typescript": "7.0.2",
+    "vitest": "4.1.0",
+    "hono": "4.10.3"
+  },
+  "engines": {
+    "node": ">=26.0.0"
+  },
+  "packageManager": "pnpm@12.10.1"
+}

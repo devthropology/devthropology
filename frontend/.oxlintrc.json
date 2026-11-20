@@ -1,0 +1,5 @@
+{
+  "rules": {
+    "typescript/no-redundant-type-constituents": "off"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "editor.inlayHints.enabled": "off",
+  "typescript.tsdk": "../node_modules/typescript/lib",
+  "[typescript][typescriptreact][javascript][javascriptreact]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  }
+}

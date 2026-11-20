@@ -1,0 +1,14 @@
+packages:
+  - backend
+  - frontend
+
+# Only reviewed install scripts may run.
+allowBuilds:
+  esbuild: true
+  '@sentry/cli': true
+  sharp: true
+  unrs-resolver: true
+  workerd: true
+  cpu-features: false
+  protobufjs: false
+  ssh2: false

@@ -1,0 +1,52 @@
+/* Custom scrollbar styles */
+.data-table-container {
+  scrollbar-width: thin;
+  scrollbar-color: #4b5563 #1f2937;
+  /* Force scrollbars to always be visible when needed */
+  scrollbar-gutter: stable;
+}
+
+/* WebKit scrollbar styles */
+.data-table-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+  /* Always show scrollbars when content overflows */
+  -webkit-appearance: none;
+}
+
+.data-table-container {
+  /* Ensure scrollbars are always visible when needed */
+  overflow-behavior: contain;
+}
+
+.data-table-container::-webkit-scrollbar-track {
+  background: #1f2937;
+  border-radius: 4px;
+}
+
+.data-table-container::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+.data-table-container::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+.data-table-container::-webkit-scrollbar-corner {
+  background: #1f2937;
+}
+
+/* In custom horizontal scrollbar mode, keep the native vertical scrollbar
+   visible while hiding the native horizontal bar behind the custom thumb. */
+.data-table-container.custom-hscroll-hidden {
+  scrollbar-width: thin;
+}
+
+.data-table-container.custom-hscroll-hidden::-webkit-scrollbar:vertical {
+  width: 8px;
+}
+
+.data-table-container.custom-hscroll-hidden::-webkit-scrollbar:horizontal {
+  height: 0;
+}
