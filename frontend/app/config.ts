@@ -8,15 +8,19 @@ const devBackendApiUrl = import.meta.env.VITE_BACKEND_API_URL;
 const devBackendPort = import.meta.env.VITE_BACKEND_PORT;
 const devBackendUrlFromPort = devBackendPort ? `http://localhost:${devBackendPort}` : undefined;
 
-// Self-hosted SSR reads runtime settings; browser calls use the same-origin proxy.
-export const API_URL = import.meta.env.SELF_HOSTED
-  ? import.meta.env.SSR
-    ? process.env.VITE_BACKEND_API_URL ||
-      `http://localhost:${process.env.VITE_BACKEND_PORT || "8000"}`
-    : window.location.origin
-  : isDevelopment
-    ? devBackendApiUrl || devBackendUrlFromPort || "http://localhost:8000"
-    : import.meta.env.VITE_BACKEND_API_URL;
+// Self-hosted and Vercel SSR read runtime settings; browser calls use the same-origin proxy/rewrite.
+const rawApiUrl =
+  import.meta.env.SELF_HOSTED || import.meta.env.VERCEL
+    ? import.meta.env.SSR
+      ? process.env.BACKEND_API_URL ||
+        process.env.VITE_BACKEND_API_URL ||
+        `http://localhost:${process.env.VITE_BACKEND_PORT || "8000"}`
+      : window.location.origin
+    : isDevelopment
+      ? devBackendApiUrl || devBackendUrlFromPort || "http://localhost:8000"
+      : import.meta.env.VITE_BACKEND_API_URL;
+
+export const API_URL = rawApiUrl?.replace(/\/+$/, "");
 
 const DEFAULT_TIMEOUT_MS = 7000;
 // Keep safe GETs alive long enough for Railway's sleeping Postgres service to wake.

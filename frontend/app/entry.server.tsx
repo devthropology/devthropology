@@ -8,6 +8,12 @@ const { renderToReadableStream } = ReactDOMServer;
 
 export const streamTimeout = 30_000;
 
+function captureServerException(error: unknown): void {
+  if (process.env.SENTRY_DSN || process.env.VITE_SENTRY_DSN) {
+    Sentry.captureException(error);
+  }
+}
+
 export default async function handleRequest(
   request: Request,
   responseStatusCode: number,
@@ -25,7 +31,7 @@ export default async function handleRequest(
           }
 
           console.error(error);
-          Sentry.captureException(error);
+          captureServerException(error);
           responseStatusCode = 500;
         },
       },
@@ -48,7 +54,7 @@ export default async function handleRequest(
     }
 
     console.error("Error in handleRequest:", error);
-    Sentry.captureException(error);
+    captureServerException(error);
     return new Response("Internal Server Error", { status: 500 });
   }
 }

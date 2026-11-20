@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const selfHosted = process.env.SELF_HOSTED === "true";
+const vercel = process.env.VERCEL === "1" || process.env.VERCEL === "true";
+const nonCloudflareServer = selfHosted || vercel;
 const buildDirectory = selfHosted ? "build-self-hosted" : "build";
 const backendTarget =
   process.env.VITE_BACKEND_API_URL ||
@@ -15,7 +17,10 @@ const backendTarget =
 const frontendPortEnv = process.env.VITE_FRONTEND_PORT;
 const frontendPort = frontendPortEnv ? Number(frontendPortEnv) : undefined;
 const resolvedFrontendPort = Number.isFinite(frontendPort) ? frontendPort : undefined;
-const sentryRelease = process.env.SENTRY_RELEASE || process.env.CF_PAGES_COMMIT_SHA;
+const sentryRelease =
+  process.env.SENTRY_RELEASE ||
+  process.env.VERCEL_GIT_COMMIT_SHA ||
+  process.env.CF_PAGES_COMMIT_SHA;
 const shouldUploadSentryArtifacts = Boolean(process.env.SENTRY_AUTH_TOKEN);
 
 // Cloudflare builds bake the API URL into the bundle; fail instead of guessing.
@@ -29,7 +34,7 @@ function requireBackendApiUrl(): Plugin {
       apiUrl = config.env.VITE_BACKEND_API_URL;
     },
     buildStart() {
-      if (!selfHosted && !apiUrl) {
+      if (!nonCloudflareServer && !apiUrl) {
         this.error("VITE_BACKEND_API_URL must be set for Cloudflare builds");
       }
     },
@@ -59,6 +64,7 @@ export default defineConfig({
   ],
   define: {
     "import.meta.env.SELF_HOSTED": JSON.stringify(selfHosted),
+    "import.meta.env.VERCEL": JSON.stringify(vercel),
   },
   build: {
     sourcemap: shouldUploadSentryArtifacts ? "hidden" : false,
@@ -66,7 +72,7 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
     dedupe: ["zod"],
-    alias: selfHosted
+    alias: nonCloudflareServer
       ? {
           "@sentry/cloudflare": resolve(__dirname, "app/utils/selfHostedSentry.ts"),
         }

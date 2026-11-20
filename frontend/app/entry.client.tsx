@@ -17,38 +17,40 @@ import {
   REPLAYS_ON_ERROR_SAMPLE_RATE,
 } from "./sentry.config";
 
-Sentry.init({
-  dsn: SENTRY_DSN,
-  enabled: Boolean(SENTRY_DSN),
-  sendDefaultPii: true,
+if (SENTRY_DSN) {
+  Sentry.init({
+    dsn: SENTRY_DSN,
+    enabled: true,
+    sendDefaultPii: true,
 
-  integrations: [
-    Sentry.reactRouterV7BrowserTracingIntegration({
-      useEffect,
-      useLocation,
-      useNavigationType,
-      createRoutesFromChildren,
-      matchRoutes,
-    }),
-    Sentry.replayIntegration(),
-    Sentry.consoleLoggingIntegration({
-      levels: ["error", "warn"],
-    }),
-  ],
+    integrations: [
+      Sentry.reactRouterV7BrowserTracingIntegration({
+        useEffect,
+        useLocation,
+        useNavigationType,
+        createRoutesFromChildren,
+        matchRoutes,
+      }),
+      Sentry.replayIntegration(),
+      Sentry.consoleLoggingIntegration({
+        levels: ["error", "warn"],
+      }),
+    ],
 
-  tracesSampleRate: TRACES_SAMPLE_RATE,
+    tracesSampleRate: TRACES_SAMPLE_RATE,
 
-  tracePropagationTargets: ["localhost", import.meta.env.VITE_BACKEND_API_URL].filter(
-    (target): target is string => Boolean(target),
-  ),
+    tracePropagationTargets: ["localhost", import.meta.env.VITE_BACKEND_API_URL].filter(
+      (target): target is string => Boolean(target),
+    ),
 
-  replaysSessionSampleRate: REPLAYS_SESSION_SAMPLE_RATE,
-  replaysOnErrorSampleRate: REPLAYS_ON_ERROR_SAMPLE_RATE,
-  environment: SENTRY_ENVIRONMENT,
-  release: SENTRY_RELEASE,
+    replaysSessionSampleRate: REPLAYS_SESSION_SAMPLE_RATE,
+    replaysOnErrorSampleRate: REPLAYS_ON_ERROR_SAMPLE_RATE,
+    environment: SENTRY_ENVIRONMENT,
+    release: SENTRY_RELEASE,
 
-  enableLogs: true,
-});
+    enableLogs: true,
+  });
+}
 
 startTransition(() => {
   hydrateRoot(
