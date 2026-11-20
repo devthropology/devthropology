@@ -1,0 +1,17 @@
+services:
+  backend:
+    command: pnpm run dev
+    port: 8000
+    health: /
+  frontend:
+    command: pnpm exec react-router dev --host 0.0.0.0 --port "$PORT"
+    cwd: frontend
+    port: 3000
+    health: /login
+    env:
+      SELF_HOSTED: "true"
+      VITE_BACKEND_PORT: "8000"
+    portal:
+      url: /
+      title: Devthropology
+      description: Local dev app seeded with tailscale/tailscale PRs. Sign in with dev / devpassword (or click Demo Login).

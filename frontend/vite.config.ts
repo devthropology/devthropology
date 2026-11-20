@@ -73,6 +73,7 @@ export default defineConfig({
       : {},
   },
   server: {
+    allowedHosts: process.env.AMP_ORB ? true : undefined,
     port: resolvedFrontendPort,
     strictPort: false,
     watch: {
