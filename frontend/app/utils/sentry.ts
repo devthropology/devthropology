@@ -62,8 +62,15 @@ function loadSentryModule(): Promise<SentryCaptureModule> {
   return sentryModulePromise;
 }
 
+function isSentryEnabled(): boolean {
+  if (import.meta.env.SSR) {
+    return Boolean(process.env.SENTRY_DSN || process.env.VITE_SENTRY_DSN);
+  }
+  return Boolean(import.meta.env.VITE_SENTRY_DSN);
+}
+
 export function captureException(error: unknown, context?: CaptureContext): void {
-  if (isIgnorableRouteError(error)) {
+  if (isIgnorableRouteError(error) || !isSentryEnabled()) {
     return;
   }
 

@@ -27,9 +27,25 @@ describe("self-hosted API URLs", () => {
 
   it("preserves the Cloudflare production API URL", async () => {
     vi.stubEnv("SELF_HOSTED", undefined);
+    vi.stubEnv("VERCEL", undefined);
     vi.stubEnv("NODE_ENV", "production");
     vi.stubEnv("VITE_BACKEND_API_URL", "https://api.example.com");
     const { API_URL } = await import("./config");
     expect(API_URL).toBe("https://api.example.com");
+  });
+
+  it("uses same-origin in the browser and trims trailing slashes on BACKEND_API_URL on SSR for Vercel Services", async () => {
+    vi.stubEnv("SELF_HOSTED", undefined);
+    vi.stubEnv("VERCEL", "1");
+    vi.stubEnv("SSR", false);
+    const { API_URL: browserUrl } = await import("./config");
+    expect(browserUrl).toBe(window.location.origin);
+
+    vi.resetModules();
+    vi.stubEnv("VERCEL", "1");
+    vi.stubEnv("SSR", true);
+    vi.stubEnv("BACKEND_API_URL", "https://backend.internal.vercel.app/");
+    const { API_URL: ssrUrl } = await import("./config");
+    expect(ssrUrl).toBe("https://backend.internal.vercel.app");
   });
 });

@@ -1,5 +1,7 @@
 import { githubArchiveFromEnv } from "./features/githubArchive/githubArchiveService.ts";
+import { timingSafeEqual } from "node:crypto";
 import process, { env } from "node:process";
+import { runSyncCron } from "./cron/syncCron.ts";
 import { appendFile } from "node:fs/promises";
 import { once } from "node:events";
 import { createHttpServer } from "./httpServer.ts";
@@ -11,6 +13,7 @@ import {
   createReportSqlClient,
   createSqlClient,
   getSharedSqlClient,
+  resolveDatabaseUrl,
   SqlClient,
 } from "./repository/sqlClient.ts";
 import { ComputedUserMetricsRepository } from "./repository/computedUserMetricsRepository.ts";
@@ -139,7 +142,7 @@ function shouldWriteRequestLogFile(): boolean {
     return false;
   }
 
-  return !env.RAILWAY_ENVIRONMENT && !env.RAILWAY_SERVICE_NAME;
+  return !env.RAILWAY_ENVIRONMENT && !env.RAILWAY_SERVICE_NAME && !env.VERCEL;
 }
 
 async function appendRequestLogFile(message: string): Promise<void> {
@@ -512,10 +515,10 @@ registerFatalErrorHandlers();
 async function initializeFromEnv() {
   const start = Date.now();
 
-  const pgUrl = env.DATABASE_URL_PG;
+  const pgUrl = resolveDatabaseUrl();
   if (!pgUrl) {
     throw new Error(
-      "DATABASE_URL_PG must be configured for authentication services",
+      "DATABASE_URL_PG (or the Vercel Aurora PG_PGHOST integration) must be configured",
     );
   }
 
@@ -890,6 +893,70 @@ async function resolveReportUserFilters(
 
 app.get("/", (c: Context) => {
   return c.text("Hello");
+});
+
+function isValidBearerSecret(
+  authHeader: string | undefined,
+  expectedSecret: string,
+): boolean {
+  if (!authHeader?.startsWith("Bearer ")) {
+    return false;
+  }
+  const actual = Buffer.from(authHeader.slice("Bearer ".length), "utf8");
+  const expected = Buffer.from(expectedSecret, "utf8");
+  return actual.length === expected.length && timingSafeEqual(actual, expected);
+}
+
+const SYNC_CRON_LOCK_KEYS = [71423, 202604] as const;
+
+app.get("/api/cron/sync", async (c: Context) => {
+  const cronSecret = env.CRON_SECRET;
+  if (!cronSecret) {
+    return c.json({ error: "CRON_SECRET is not configured" }, 503);
+  }
+  if (!isValidBearerSecret(c.req.header("authorization"), cronSecret)) {
+    return c.json({ error: "Unauthorized" }, 401);
+  }
+  if (!sharedSqlClient) {
+    return c.json({ error: "Database unavailable" }, 503);
+  }
+
+  const lockConn = await sharedSqlClient.reserve();
+  let lockAcquired = false;
+  try {
+    const [{ acquired }] = await lockConn<{ acquired: boolean }[]>`
+      SELECT pg_try_advisory_lock(${SYNC_CRON_LOCK_KEYS[0]}, ${SYNC_CRON_LOCK_KEYS[1]}) AS acquired
+    `;
+    lockAcquired = acquired;
+    if (!lockAcquired) {
+      return c.json({ ok: true, skipped: true, reason: "sync_in_progress" });
+    }
+
+    const summaries = await runSyncCron(sharedSqlClient);
+    const hasError = summaries.some((s) => s.outcomeCode === "PARTIAL_ERROR");
+    return c.json(
+      {
+        ok: !hasError,
+        repositories: summaries.length,
+        summaries: summaries.map((s) => ({
+          org: s.repository.org,
+          name: s.repository.name,
+          outcomeCode: s.outcomeCode,
+          processedCount: s.processedCount,
+          requestedCount: s.requestedCount,
+        })),
+      },
+      hasError ? 500 : 200,
+    );
+  } finally {
+    if (lockAcquired) {
+      urlCache.clear();
+      await lockConn`
+        SELECT pg_advisory_unlock(${SYNC_CRON_LOCK_KEYS[0]}, ${SYNC_CRON_LOCK_KEYS[1]})
+      `.catch((err) => console.error("Failed to release sync cron lock:", err));
+    }
+    lockConn.release();
+  }
 });
 
 app.route(

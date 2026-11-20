@@ -1,0 +1,38 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "frontend": {
+      "root": "frontend/",
+      "framework": "react-router",
+      "bindings": [
+        {
+          "type": "service",
+          "service": "backend",
+          "format": "url",
+          "env": "BACKEND_API_URL"
+        }
+      ]
+    },
+    "backend": {
+      "root": "backend/",
+      "framework": "hono",
+      "entrypoint": "vercel.mjs"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": { "service": "backend" }
+    },
+    {
+      "source": "/(.*)",
+      "destination": { "service": "frontend" }
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/sync",
+      "schedule": "0 * * * *"
+    }
+  ]
+}
