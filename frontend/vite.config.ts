@@ -78,6 +78,13 @@ export default defineConfig({
         }
       : {},
   },
+  ssr: nonCloudflareServer
+    ? {
+        // Bundle react-aria packages so Node ESM on Vercel does not hit
+        // @react-aria/i18n's CJS/ESM named-export mismatch at runtime.
+        noExternal: [/^react-aria/, /^@react-aria\//, /^@react-stately\//, /^@internationalized\//],
+      }
+    : undefined,
   server: {
     port: resolvedFrontendPort,
     strictPort: false,

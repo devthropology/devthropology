@@ -21,3 +21,5 @@ _devthropology_postgres_prod/
 # Private raw GitHub payloads (default archive directory)
 /data/
 /backend/data/
+
+.vercel
