@@ -62,6 +62,7 @@ type ReviewCommentRow = Pick<
   author_association: string;
   gh_user_id: number | string;
   gh_login: string;
+  gh_type: string | null;
 };
 
 type IssueCommentRow = {
@@ -73,6 +74,7 @@ type IssueCommentRow = {
   author_association: string;
   gh_user_id: number | string;
   gh_login: string;
+  gh_type: string | null;
 };
 
 type ReviewRow = {
@@ -85,6 +87,7 @@ type ReviewRow = {
   author_association: string;
   gh_user_id: number | string;
   gh_login: string;
+  gh_type: string | null;
 };
 
 type CommitRow = {
@@ -94,6 +97,7 @@ type CommitRow = {
   committed_at: Date;
   gh_user_id: number | string;
   gh_login: string;
+  gh_type: string | null;
 };
 
 export type PullRequestEnhancedStatsInsertRow = {
@@ -224,7 +228,8 @@ export class PostgresBackfillRepository {
               prc.updated_at,
               prc.author_association,
               u.gh_user_id,
-              u.gh_login
+              u.gh_login,
+              u.gh_type
             FROM pull_request_comment prc
             INNER JOIN "user" u ON u.user_id = prc.user_id
             WHERE prc.pull_request_id = ANY($1)
@@ -242,7 +247,8 @@ export class PostgresBackfillRepository {
               ic.updated_at,
               ic.author_association,
               u.gh_user_id,
-              u.gh_login
+              u.gh_login,
+              u.gh_type
             FROM issue_comment ic
             INNER JOIN "user" u ON u.user_id = ic.user_id
             WHERE ic.issue_id = ANY($1)
@@ -261,7 +267,8 @@ export class PostgresBackfillRepository {
               prr.commit_id,
               prr.author_association,
               u.gh_user_id,
-              u.gh_login
+              u.gh_login,
+              u.gh_type
             FROM pull_request_review prr
             INNER JOIN "user" u ON u.user_id = prr.user_id
             WHERE prr.pull_request_id = ANY($1)
@@ -277,7 +284,8 @@ export class PostgresBackfillRepository {
               prc.message,
               prc.committed_at,
               u.gh_user_id,
-              u.gh_login
+              u.gh_login,
+              u.gh_type
             FROM pull_request_commit prc
             INNER JOIN "user" u ON u.user_id = prc.user_id
             WHERE prc.pull_request_id = ANY($1)
@@ -375,6 +383,7 @@ export class PostgresBackfillRepository {
                 user: {
                   id: Number(comment.gh_user_id),
                   login: comment.gh_login,
+                  type: comment.gh_type,
                 },
                 created_at: new Date(comment.created_at),
                 updated_at: new Date(comment.updated_at),
@@ -390,6 +399,7 @@ export class PostgresBackfillRepository {
                 user: {
                   id: Number(comment.gh_user_id),
                   login: comment.gh_login,
+                  type: comment.gh_type,
                 },
                 created_at: new Date(comment.created_at),
                 updated_at: new Date(comment.updated_at),
@@ -404,6 +414,7 @@ export class PostgresBackfillRepository {
               user: {
                 id: Number(review.gh_user_id),
                 login: review.gh_login,
+                type: review.gh_type,
               },
               body: review.body ?? "",
               state: normalizeReviewState(review.state),
@@ -421,6 +432,7 @@ export class PostgresBackfillRepository {
                 user: {
                   id: Number(commit.gh_user_id),
                   login: commit.gh_login,
+                  type: commit.gh_type,
                 },
                 commitTime: new Date(commit.committed_at),
               }),

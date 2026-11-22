@@ -72,7 +72,7 @@ export class PostgresUserRelationshipRepository implements UserRelationshipRepos
       WHERE i.repository_id = ${repositoryId}
         AND i.issue_type_id = 2
         AND prr.user_id <> i.user_id
-        AND u.gh_login NOT LIKE '%[bot]%'
+        AND NOT COALESCE(u.gh_type = 'Bot', u.gh_login LIKE '%[bot]%')
         ${intervalClause}
     `;
   }
@@ -101,7 +101,7 @@ export class PostgresUserRelationshipRepository implements UserRelationshipRepos
         WHERE i.repository_id = ${repositoryId}
           AND i.issue_type_id = 2
           AND prc.user_id <> i.user_id
-          AND u.gh_login NOT LIKE '%[bot]%'
+          AND NOT COALESCE(u.gh_type = 'Bot', u.gh_login LIKE '%[bot]%')
           ${intervalClause}
 
         UNION ALL
@@ -118,7 +118,7 @@ export class PostgresUserRelationshipRepository implements UserRelationshipRepos
         WHERE i.repository_id = ${repositoryId}
           AND i.issue_type_id = 2
           AND ic.user_id <> i.user_id
-          AND u.gh_login NOT LIKE '%[bot]%'
+          AND NOT COALESCE(u.gh_type = 'Bot', u.gh_login LIKE '%[bot]%')
           ${intervalClause}
       ) comments
     `;

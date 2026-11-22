@@ -245,6 +245,7 @@ export class PostgresComputedUserMetricsRepository implements ComputedUserMetric
         SELECT
           u.user_id,
           u.gh_login,
+          u.gh_type,
           i.repository_id,
           COUNT(*)::bigint AS value
         FROM issue i
@@ -265,7 +266,7 @@ export class PostgresComputedUserMetricsRepository implements ComputedUserMetric
           DENSE_RANK() OVER (ORDER BY value DESC) AS rank,
           COUNT(*) OVER () AS rank_out_of
         FROM merged
-        WHERE gh_login NOT LIKE '%[bot]%'
+        WHERE NOT COALESCE(gh_type = 'Bot', gh_login LIKE '%[bot]%')
       )
       INSERT INTO computed_user_metrics (
         user_id,
@@ -297,7 +298,7 @@ export class PostgresComputedUserMetricsRepository implements ComputedUserMetric
         NULL::integer AS rank,
         NULL::integer AS rank_out_of
       FROM merged
-      WHERE gh_login LIKE '%[bot]%'
+      WHERE COALESCE(gh_type = 'Bot', gh_login LIKE '%[bot]%')
     `;
   }
 
@@ -326,6 +327,7 @@ export class PostgresComputedUserMetricsRepository implements ComputedUserMetric
         SELECT
           u.user_id,
           u.gh_login,
+          u.gh_type,
           i.repository_id,
           SUM(pr.additions + pr.deletions)::bigint AS value
         FROM issue i
@@ -346,7 +348,7 @@ export class PostgresComputedUserMetricsRepository implements ComputedUserMetric
           DENSE_RANK() OVER (ORDER BY value DESC) AS rank,
           COUNT(*) OVER () AS rank_out_of
         FROM contribution_totals
-        WHERE gh_login NOT LIKE '%[bot]%'
+        WHERE NOT COALESCE(gh_type = 'Bot', gh_login LIKE '%[bot]%')
       )
       INSERT INTO computed_user_metrics (
         user_id,
@@ -378,7 +380,7 @@ export class PostgresComputedUserMetricsRepository implements ComputedUserMetric
         NULL::integer AS rank,
         NULL::integer AS rank_out_of
       FROM contribution_totals
-      WHERE gh_login LIKE '%[bot]%'
+      WHERE COALESCE(gh_type = 'Bot', gh_login LIKE '%[bot]%')
     `;
   }
 
@@ -446,12 +448,13 @@ export class PostgresComputedUserMetricsRepository implements ComputedUserMetric
         SELECT
           ri.reviewer_id,
           u.gh_login,
+          u.gh_type,
           COUNT(DISTINCT ri.pull_request_id)::bigint AS value
         FROM review_interactions ri
         INNER JOIN "user" u ON u.user_id = ri.reviewer_id
         WHERE ri.interaction_time IS NOT NULL
           ${intervalClause}
-        GROUP BY ri.reviewer_id, u.gh_login
+        GROUP BY ri.reviewer_id, u.gh_login, u.gh_type
       ),
       human_ranked AS (
         SELECT
@@ -460,7 +463,7 @@ export class PostgresComputedUserMetricsRepository implements ComputedUserMetric
           DENSE_RANK() OVER (ORDER BY value DESC) AS rank,
           COUNT(*) OVER () AS rank_out_of
         FROM reviewer_summary
-        WHERE gh_login NOT LIKE '%[bot]%'
+        WHERE NOT COALESCE(gh_type = 'Bot', gh_login LIKE '%[bot]%')
       )
       INSERT INTO computed_user_metrics (
         user_id,
@@ -492,7 +495,7 @@ export class PostgresComputedUserMetricsRepository implements ComputedUserMetric
         NULL::integer AS rank,
         NULL::integer AS rank_out_of
       FROM reviewer_summary rs
-      WHERE rs.gh_login LIKE '%[bot]%'
+      WHERE COALESCE(rs.gh_type = 'Bot', rs.gh_login LIKE '%[bot]%')
     `;
   }
 
@@ -562,12 +565,13 @@ export class PostgresComputedUserMetricsRepository implements ComputedUserMetric
         SELECT
           ce.commenter_id,
           u.gh_login,
+          u.gh_type,
           COUNT(*)::bigint AS value
         FROM comment_events ce
         INNER JOIN "user" u ON u.user_id = ce.commenter_id
         WHERE ce.interaction_time IS NOT NULL
           ${intervalClause}
-        GROUP BY ce.commenter_id, u.gh_login
+        GROUP BY ce.commenter_id, u.gh_login, u.gh_type
       ),
       human_ranked AS (
         SELECT
@@ -576,7 +580,7 @@ export class PostgresComputedUserMetricsRepository implements ComputedUserMetric
           DENSE_RANK() OVER (ORDER BY value DESC) AS rank,
           COUNT(*) OVER () AS rank_out_of
         FROM commenter_summary
-        WHERE gh_login NOT LIKE '%[bot]%'
+        WHERE NOT COALESCE(gh_type = 'Bot', gh_login LIKE '%[bot]%')
       )
       INSERT INTO computed_user_metrics (
         user_id,
@@ -608,7 +612,7 @@ export class PostgresComputedUserMetricsRepository implements ComputedUserMetric
         NULL::integer AS rank,
         NULL::integer AS rank_out_of
       FROM commenter_summary cs
-      WHERE cs.gh_login LIKE '%[bot]%'
+      WHERE COALESCE(cs.gh_type = 'Bot', cs.gh_login LIKE '%[bot]%')
     `;
   }
 

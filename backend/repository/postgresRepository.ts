@@ -197,6 +197,17 @@ export class PostgresRepository implements IRepository {
   }
 
   async getOrCreateUsers(users: User[]): Promise<Map<number, number>> {
+    // Refresh even cached users; archived payloads must not erase known types.
+    const typedUsers = users.filter((user) => user.type != null);
+    if (typedUsers.length > 0) {
+      await this.sql.unsafe(
+        `UPDATE "user" u SET gh_type = incoming.type
+         FROM jsonb_to_recordset($1::jsonb) AS incoming(id bigint, type text)
+         WHERE u.gh_user_id = incoming.id
+           AND u.gh_type IS DISTINCT FROM incoming.type`,
+        [JSON.stringify(typedUsers.map(({ id, type }) => ({ id, type })))],
+      );
+    }
     const resultMap: Map<number, number> = new Map();
     const unknownUsers: User[] = [];
 
@@ -229,7 +240,11 @@ export class PostgresRepository implements IRepository {
 
     for (const user of unknownUsers) {
       if (!resultMap.has(user.id)) {
-        const dbUser = await this.sql.unsafe(insertUser, [user.id, user.login]);
+        const dbUser = await this.sql.unsafe(insertUser, [
+          user.id,
+          user.login,
+          user.type ?? null,
+        ]);
         const dbUserId = Number(dbUser[0].user_id);
         resultMap.set(user.id, dbUserId);
         this.userIdMap.set(user.id, dbUserId);
@@ -880,7 +895,7 @@ export class PostgresRepository implements IRepository {
 
     const addUser = (user: User) => {
       const key = `${user.id}_${user.login}`;
-      if (!userMap.has(key)) {
+      if (!userMap.has(key) || user.type != null) {
         userMap.set(key, user);
       }
     };

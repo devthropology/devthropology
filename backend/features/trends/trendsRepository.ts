@@ -75,7 +75,7 @@ export class TrendsRepository {
             AND i.issue_type_id = 2
             AND pr.merged_at IS NOT NULL
             AND LOWER(pr.target_branch) IN ('main', 'master')
-            AND u.gh_login NOT LIKE '%[bot]%'
+            AND NOT COALESCE(u.gh_type = 'Bot', u.gh_login LIKE '%[bot]%')
         ),
         monthly_pr_size AS (
           SELECT
@@ -281,7 +281,7 @@ export class TrendsRepository {
             AND i.issue_type_id = 2
             AND pr.merged_at IS NOT NULL
             AND LOWER(pr.target_branch) IN ('main', 'master')
-            AND u.gh_login NOT LIKE '%[bot]%'
+            AND NOT COALESCE(u.gh_type = 'Bot', u.gh_login LIKE '%[bot]%')
         ),
         bucketed AS (
           SELECT
@@ -373,7 +373,7 @@ export class TrendsRepository {
             AND i.issue_type_id = 2
             AND pr.merged_at IS NOT NULL
             AND LOWER(pr.target_branch) IN ('main', 'master')
-            AND u.gh_login NOT LIKE '%[bot]%'
+            AND NOT COALESCE(u.gh_type = 'Bot', u.gh_login LIKE '%[bot]%')
         ),
         monthly_totals AS (
           SELECT

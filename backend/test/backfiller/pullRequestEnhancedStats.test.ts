@@ -937,3 +937,60 @@ test("prefers a human round when bot and human comments happen before the same c
   assertEquals(stats.roundsOfReview, 1);
   assertEquals(stats.botRoundsOfReview, 0);
 });
+
+test.each([
+  { login: "automation", type: "Bot", bot: true },
+  { login: "person[bot]", type: "User", bot: false },
+  { login: "legacy[bot]", type: undefined, bot: true },
+  { login: "person", type: null, bot: false },
+])(
+  "uses GitHub type for review signals and rounds: $login / $type",
+  ({ login, type, bot }) => {
+    const issue = buildPullRequestIssue();
+    const pr = issue.hydrated_pull_request!;
+    const user = { id: 2, login, type };
+    const time = new Date("2023-05-21T09:00:00Z");
+    pr.commentList = [
+      {
+        id: 10,
+        path: "file.ts",
+        body: "feedback",
+        user,
+        created_at: time,
+        updated_at: time,
+        author_association: AuthorAssociation.NONE,
+      },
+    ];
+    pr.issueCommentList = [
+      {
+        id: 11,
+        body: "feedback",
+        user,
+        created_at: time,
+        updated_at: time,
+        author_association: AuthorAssociation.NONE,
+      },
+    ];
+    pr.reviews = [
+      {
+        id: 12,
+        body: "approved",
+        user,
+        state: ReviewState.APPROVED,
+        submitted_at: time,
+        author_association: AuthorAssociation.NONE,
+      },
+    ];
+    pr.commitList.push({
+      commitSha: "fix",
+      commitTitle: "address feedback",
+      user: pr.user,
+      commitTime: new Date("2023-05-21T10:00:00Z"),
+    });
+    const stats = computePullRequestEnhancedStats(issue);
+    assertEquals(stats.roundsOfReview, bot ? 0 : 1);
+    assertEquals(stats.botRoundsOfReview, bot ? 1 : 0);
+    assertEquals(stats.firstReviewAt, bot ? null : time);
+    assertEquals(stats.firstApprovalAt, bot ? null : time);
+  },
+);
