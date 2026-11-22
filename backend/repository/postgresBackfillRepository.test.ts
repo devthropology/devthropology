@@ -58,7 +58,7 @@ describe("PostgresBackfillRepository", () => {
           {
             id: 900,
             commit_id: "reviewed-sha",
-            user: { id: 200, login: "reviewer" },
+            user: { id: 200, login: "reviewer", type: "Bot" },
             body: "looks good",
             state: ReviewState.APPROVED,
             submitted_at: new Date("2024-01-01T03:00:00Z"),
@@ -84,7 +84,7 @@ describe("PostgresBackfillRepository", () => {
             },
             path: "mod.ts",
             body: "inline",
-            user: { id: 200, login: "reviewer" },
+            user: { id: 200, login: "reviewer", type: "Bot" },
             created_at: new Date("2024-01-01T01:00:00Z"),
             updated_at: new Date("2024-01-01T01:00:00Z"),
             author_association: AuthorAssociation.MEMBER,
@@ -94,7 +94,7 @@ describe("PostgresBackfillRepository", () => {
           {
             id: 902,
             body: "thread",
-            user: { id: 200, login: "reviewer" },
+            user: { id: 200, login: "reviewer", type: "Bot" },
             created_at: new Date("2024-01-01T02:00:00Z"),
             updated_at: new Date("2024-01-01T02:00:00Z"),
             author_association: AuthorAssociation.MEMBER,
@@ -156,6 +156,11 @@ describe("PostgresBackfillRepository", () => {
     assertEquals(issue?.issue.hydrated_pull_request?.commitList.length, 2);
     const comment = issue?.issue.hydrated_pull_request?.commentList[0];
     assertEquals(comment?.pull_request_review_id, 900);
+    assertEquals(comment?.user?.type, "Bot");
+    assertEquals(
+      issue?.issue.hydrated_pull_request?.reviews[0].user?.type,
+      "Bot",
+    );
     // Missing parent comments do not block ingestion.
     assertEquals(comment?.in_reply_to_id, 899);
     assertEquals(comment?.line, null);

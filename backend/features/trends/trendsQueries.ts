@@ -48,7 +48,7 @@ export const getTrendsReviewRoundsInsights = (
         AND i.issue_type_id = 2
         AND pr.merged_at IS NOT NULL
         AND LOWER(pr.target_branch) IN ('main', 'master')
-        AND u.gh_login NOT LIKE '%[bot]%'
+        AND NOT COALESCE(u.gh_type = 'Bot', u.gh_login LIKE '%[bot]%')
         ${trendsTeamAuthorFilter(sql, teamSlug)}
     )
     SELECT
@@ -123,7 +123,7 @@ export const getTrendsPrSizeInsights = (
         AND i.issue_type_id = 2
         AND pr.merged_at IS NOT NULL
         AND LOWER(pr.target_branch) IN ('main', 'master')
-        AND u.gh_login NOT LIKE '%[bot]%'
+        AND NOT COALESCE(u.gh_type = 'Bot', u.gh_login LIKE '%[bot]%')
         ${trendsTeamAuthorFilter(sql, teamSlug)}
     ),
     bucketed AS (
@@ -196,7 +196,7 @@ export const getTrendsPrSizePercentiles = (
         AND i.issue_type_id = 2
         AND pr.merged_at IS NOT NULL
         AND LOWER(pr.target_branch) IN ('main', 'master')
-        AND u.gh_login NOT LIKE '%[bot]%'
+        AND NOT COALESCE(u.gh_type = 'Bot', u.gh_login LIKE '%[bot]%')
         ${trendsTeamAuthorFilter(sql, teamSlug)}
     )
     SELECT
@@ -231,7 +231,7 @@ export const getTrendsAuthorOutputPercentiles = (
         AND i.issue_type_id = 2
         AND pr.merged_at IS NOT NULL
         AND LOWER(pr.target_branch) IN ('main', 'master')
-        AND u.gh_login NOT LIKE '%[bot]%'
+        AND NOT COALESCE(u.gh_type = 'Bot', u.gh_login LIKE '%[bot]%')
         ${trendsTeamAuthorFilter(sql, teamSlug)}
       GROUP BY 1, 2
     )
@@ -272,7 +272,7 @@ export const getTrendsAiAssistedSummary = (
         AND i.issue_type_id = 2
         AND pr.merged_at IS NOT NULL
         AND LOWER(pr.target_branch) IN ('main', 'master')
-        AND u.gh_login NOT LIKE '%[bot]%'
+        AND NOT COALESCE(u.gh_type = 'Bot', u.gh_login LIKE '%[bot]%')
         ${trendsTeamAuthorFilter(sql, teamSlug)}
     ),
     monthly_totals AS (
@@ -321,7 +321,7 @@ export const getTrendsAiAssistedModelBreakdown = (
         AND i.issue_type_id = 2
         AND pr.merged_at IS NOT NULL
         AND LOWER(pr.target_branch) IN ('main', 'master')
-        AND u.gh_login NOT LIKE '%[bot]%'
+        AND NOT COALESCE(u.gh_type = 'Bot', u.gh_login LIKE '%[bot]%')
         ${trendsTeamAuthorFilter(sql, teamSlug)}
     ),
     monthly_totals AS (

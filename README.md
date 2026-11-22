@@ -394,11 +394,18 @@ WHERE issue_author_id <> reviewer_user_id
 
 ### Bot Filtering
 
-Bot accounts are identified by string matching on the GitHub login:
+GitHub account type is preserved as `user.gh_type`. When present, only
+`type == "Bot"` identifies a bot, regardless of login. Older payloads and stored
+users without a type retain the login fallback:
 
 ```sql
-WHERE u.gh_login NOT LIKE '%[bot]%'
+WHERE NOT COALESCE(u.gh_type = 'Bot', u.gh_login LIKE '%[bot]%')
 ```
+
+Apply the `add_github_user_type` migration before running the updated backend.
+Existing rows start with a NULL type; re-sync GitHub data to populate it, then
+recompute enhanced stats and cached metrics for historical results. No account
+type is guessed for deleted users.
 
 Comment counts are typically broken into four buckets: author comments,
 non-author human comments, bot comments, and (on the reviews page)
@@ -650,7 +657,7 @@ reviews-with-body for that reviewer on that PR.
 | `issue_comment`                                   | Comment (in log2 pool) | Conversation-level feedback           |
 
 **Filters:** Self-reviews excluded (`actor != author`). Bot users filtered
-(`gh_login NOT LIKE '%[bot]%'`).
+(GitHub account type, with a login fallback for missing types).
 
 **Rounds multiplier:** Uses the pre-computed
 `pull_request_round_of_review.rounds` value (see

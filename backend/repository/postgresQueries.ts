@@ -4,11 +4,12 @@ import { ComputedFileSystemNode } from "../models/dbTypes.ts";
 type Sql = ReturnType<typeof postgres>;
 
 export const insertUser = `
-INSERT INTO "user" (gh_user_id, gh_login)
-  VALUES ($1, $2)
+INSERT INTO "user" (gh_user_id, gh_login, gh_type)
+  VALUES ($1, $2, $3)
 ON CONFLICT (gh_login)
   DO UPDATE SET
-    gh_login = EXCLUDED.gh_login
+    gh_login = EXCLUDED.gh_login,
+    gh_type = COALESCE(EXCLUDED.gh_type, "user".gh_type)
   RETURNING
     user_id;
 `;
@@ -248,7 +249,7 @@ ranked_activity AS (
         all_activity a
     JOIN "user" u ON u.user_id = a.reviewer_id
     WHERE
-        u.gh_login NOT LIKE '%[bot]%' -- FILTER BOTS HERE
+        NOT COALESCE(u.gh_type = 'Bot', u.gh_login LIKE '%[bot]%') -- FILTER BOTS HERE
 ),
 -- 3. Calculate Author Interactions
 author_interaction_ranks AS (
@@ -457,7 +458,7 @@ ranked_activity AS (
         all_activity a
     JOIN "user" u ON u.user_id = a.reviewer_id
     WHERE
-        u.gh_login NOT LIKE '%[bot]%'
+        NOT COALESCE(u.gh_type = 'Bot', u.gh_login LIKE '%[bot]%')
 ),
 -- Filter for the specific user again for final aggregation
 enriched_activity AS (
@@ -691,7 +692,7 @@ comments_by_pr AS (
         mp.issue_author_id,
         mp.issue_id,
         COUNT(
-            CASE WHEN cu.gh_login LIKE '%[bot]' THEN
+            CASE WHEN COALESCE(cu.gh_type = 'Bot', cu.gh_login LIKE '%[bot]') THEN
                 NULL -- Ignore bot comments
             ELSE
                 rac.issue_id
@@ -756,7 +757,7 @@ time_to_first_review AS (
         mp.issue_created_at,
         mp.issue_author_id,
         EXTRACT(EPOCH FROM (MIN(
-                    CASE WHEN cu.gh_login LIKE '%[bot]' THEN
+                    CASE WHEN COALESCE(cu.gh_type = 'Bot', cu.gh_login LIKE '%[bot]') THEN
                         NULL
                     ELSE
                         rac.action_time
@@ -1157,6 +1158,7 @@ all_interactions AS (
         tpr.author_user_id AS author_id,
         prc.created_at AS interaction_time,
         u.gh_login,
+        u.gh_type,
         'comment' AS interaction_type
     FROM
         pull_request_comment prc
@@ -1169,6 +1171,7 @@ SELECT
     tpr.author_user_id AS author_id,
     ic.created_at,
     u.gh_login,
+    u.gh_type,
     'comment'
 FROM
     issue_comment ic
@@ -1183,6 +1186,7 @@ SELECT
     tpr.author_user_id AS author_id,
     prr.submitted_at,
     u.gh_login,
+    u.gh_type,
     CASE WHEN prr.body <> '' THEN
         'comment'
     ELSE
@@ -1199,10 +1203,10 @@ comment_counts AS (
         COUNT(*) FILTER (WHERE user_id = author_id
                 AND interaction_type = 'comment') AS author_comments,
             COUNT(*) FILTER (WHERE user_id <> author_id
-                AND gh_login NOT LIKE '%[bot]%'
+                AND NOT COALESCE(gh_type = 'Bot', gh_login LIKE '%[bot]%')
                 AND interaction_type = 'comment') AS non_author_comments,
         COUNT(*) FILTER (WHERE user_id <> author_id
-            AND gh_login LIKE '%[bot]%'
+            AND COALESCE(gh_type = 'Bot', gh_login LIKE '%[bot]%')
             AND interaction_type = 'comment') AS bot_comments
     FROM
         all_interactions
@@ -1515,6 +1519,7 @@ all_interactions AS (
         rpr.pull_request_id,
         ic.user_id,
         u.gh_login,
+        u.gh_type,
         rpr.author_user_id,
         ic.created_at AS interaction_time
     FROM
@@ -1527,6 +1532,7 @@ SELECT
     rpr.pull_request_id,
     prc.user_id,
     u.gh_login,
+    u.gh_type,
     rpr.author_user_id,
     prc.created_at
 FROM
@@ -1539,6 +1545,7 @@ SELECT
     rpr.pull_request_id,
     prr.user_id,
     u.gh_login,
+    u.gh_type,
     rpr.author_user_id,
     prr.submitted_at
 FROM
@@ -1558,6 +1565,7 @@ all_review_actions AS (
         ic.created_at AS action_time,
         ic.user_id,
         u.gh_login,
+        u.gh_type,
         rpr.author_user_id
     FROM
         reviewed_prs rpr
@@ -1570,6 +1578,7 @@ SELECT
     prc.created_at,
     prc.user_id,
     u.gh_login,
+    u.gh_type,
     rpr.author_user_id
 FROM
     reviewed_prs rpr
@@ -1582,6 +1591,7 @@ SELECT
     prr.submitted_at,
     prr.user_id,
     u.gh_login,
+    u.gh_type,
     rpr.author_user_id
 FROM
     reviewed_prs rpr
@@ -1598,8 +1608,8 @@ comment_counts AS (
         COUNT(*) FILTER (WHERE user_id = ${userId}) AS user_of_interest_comments,
             COUNT(*) FILTER (WHERE user_id != author_user_id
                 AND user_id != ${userId}
-                AND gh_login NOT LIKE '%[bot]%') AS other_user_comments,
-            COUNT(*) FILTER (WHERE gh_login LIKE '%[bot]%') AS bot_comments FROM all_interactions
+                AND NOT COALESCE(gh_type = 'Bot', gh_login LIKE '%[bot]%')) AS other_user_comments,
+            COUNT(*) FILTER (WHERE COALESCE(gh_type = 'Bot', gh_login LIKE '%[bot]%')) AS bot_comments FROM all_interactions
         GROUP BY
             pull_request_id),
         -- 4. Calculate stats specific to the user-of-interest's contribution (now based on user_actions to include reviews without body)
@@ -1629,7 +1639,7 @@ comment_counts AS (
                     all_review_actions
                 WHERE
                     user_id != author_user_id
-                    AND gh_login NOT LIKE '%[bot]%'
+                    AND NOT COALESCE(gh_type = 'Bot', gh_login LIKE '%[bot]%')
                 GROUP BY
                     pull_request_id)
                 -- Final SELECT to assemble the report
@@ -1682,7 +1692,7 @@ comment_counts AS (
 
 export const getRenamedFilesForBackfill = `
 SELECT 
-    u.gh_login, 
+    u.gh_login,
     i.title, 
     i.created_at, 
     i.gh_issue_id, 

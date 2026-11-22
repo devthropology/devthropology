@@ -1,3 +1,4 @@
+import { isGithubBot, type User } from "../models/gh/user.ts";
 import { HydratedIssue } from "../models/gh/issue.ts";
 import type { HydratedPullRequest } from "../models/gh/hydratedPullRequest.ts";
 import { ReviewState } from "../models/gh/review.ts";
@@ -46,20 +47,15 @@ import { extractFirstAiAssistedModel } from "./aiAssistedModel.ts";
 // created_at for every comment. This avoids splitting a draft review across
 // author commits before its feedback was published. Other timing metrics,
 // including firstReviewAt, retain their existing semantics.
-const isBotLogin = (login: string): boolean => login.includes("[bot]");
 
-function hasUser<T extends { user: { login: string; id: number } | null }>(
+function hasUser<T extends { user: User | null }>(
   value: T,
-): value is T & { user: { login: string; id: number } } {
+): value is T & { user: User } {
   return value.user !== null;
 }
 
-const isHumanReviewer = (
-  prAuthorId: number,
-  login: string,
-  userId: number,
-): boolean => {
-  return userId !== prAuthorId && !isBotLogin(login);
+const isHumanReviewer = (prAuthorId: number, user: User): boolean => {
+  return user.id !== prAuthorId && !isGithubBot(user);
 };
 
 export function computePullRequestEnhancedStats(
@@ -84,15 +80,11 @@ export function computePullRequestEnhancedStats(
   const firstReviewCandidates = [
     ...pr.commentList
       .filter(hasUser)
-      .filter((comment) =>
-        isHumanReviewer(prAuthorId, comment.user.login, comment.user.id),
-      )
+      .filter((comment) => isHumanReviewer(prAuthorId, comment.user))
       .map((comment) => comment.created_at),
     ...pr.issueCommentList
       .filter(hasUser)
-      .filter((comment) =>
-        isHumanReviewer(prAuthorId, comment.user.login, comment.user.id),
-      )
+      .filter((comment) => isHumanReviewer(prAuthorId, comment.user))
       .map((comment) => comment.created_at),
     ...pr.reviews
       .filter((review) => {
@@ -108,7 +100,7 @@ export function computePullRequestEnhancedStats(
         ) {
           return false;
         }
-        return isHumanReviewer(prAuthorId, review.user.login, review.user.id);
+        return isHumanReviewer(prAuthorId, review.user);
       })
       .map((review) => review.submitted_at!),
   ];
@@ -124,7 +116,7 @@ export function computePullRequestEnhancedStats(
       if (review.state !== ReviewState.APPROVED) {
         return false;
       }
-      return isHumanReviewer(prAuthorId, review.user.login, review.user.id);
+      return isHumanReviewer(prAuthorId, review.user);
     })
     .map((review) => review.submitted_at!);
 
@@ -223,6 +215,7 @@ function computeRoundCounts(issue: HydratedIssue): {
           timestamp,
           userId: comment.user.id,
           login: comment.user.login,
+          isBot: isGithubBot(comment.user),
         },
       ];
     }),
@@ -235,7 +228,7 @@ function computeRoundCounts(issue: HydratedIssue): {
 
   for (const event of events) {
     if (event.type === "comment" && event.userId !== prAuthorId) {
-      if (isBotLogin(event.login)) {
+      if (event.isBot) {
         sawBotComment = true;
       } else {
         sawHumanComment = true;

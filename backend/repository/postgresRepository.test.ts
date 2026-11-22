@@ -28,6 +28,35 @@ describe("PostgresRepository", () => {
     await sql?.end({ timeout: 1 });
   });
 
+  it("refreshes types for existing and cached users without erasing them", async () => {
+    const repo = new PostgresRepository("typed-org", "typed-repo", sql);
+    const users = [
+      { id: 99001, login: "typed-automation" },
+      { id: 99002, login: "typed-person[bot]" },
+    ];
+    await repo.getOrCreateUsers(users);
+    await repo.getOrCreateUsers([
+      { ...users[0], type: "Bot" },
+      { ...users[1], type: "User" },
+    ]);
+    await repo.getOrCreateUsers(users);
+    const freshRepo = new PostgresRepository("typed-org", "typed-repo", sql);
+    await freshRepo.getOrCreateUsers([
+      { ...users[0], type: "Bot" },
+      { ...users[1], type: null },
+    ]);
+    const rows = await sql.unsafe(`SELECT gh_login, gh_type,
+      COALESCE(gh_type = 'Bot', gh_login LIKE '%[bot]%') AS is_bot
+      FROM "user" WHERE gh_user_id IN (99001, 99002) ORDER BY gh_user_id`);
+    assertEquals(
+      rows.map((row) => [row.gh_type, row.is_bot]),
+      [
+        ["Bot", true],
+        ["User", false],
+      ],
+    );
+  });
+
   it("should create new repository and return repository_id", async () => {
     const repo = new PostgresRepository("testorg", "testrepo", sql);
 
